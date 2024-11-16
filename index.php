@@ -1,48 +1,80 @@
 <html>
 
 <head>
-<title>Exemplo PHP</title>
+<title>Exemplo PHP V2</title>
 </head>
 <body>
 
 <?php
-ini_set("display_errors", 1);
-header('Content-Type: text/html; charset=iso-8859-1');
-
-
-
-echo 'Versao Atual do PHP: ' . phpversion() . '<br>';
-
-$servername = "54.234.153.24";
+$servername = "54.234.128.60";
 $username = "root";
 $password = "Senha123";
 $database = "meubanco";
 
-// Criar conexão
+// Create connection
+$conn = new mysqli($servername, $username, $password, $database);
 
-
-$link = new mysqli($servername, $username, $password, $database);
-
-/* check connection */
-if (mysqli_connect_errno()) {
-    printf("Connect failed: %s\n", mysqli_connect_error());
-    exit();
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-$valor_rand1 =  rand(1, 999);
-$valor_rand2 = strtoupper(substr(bin2hex(random_bytes(4)), 1));
-$host_name = gethostname();
+// Assign variables
+$company = "YourCompany";
+$cnpj = "12345678901234";
+$state = "SP";
+$product = "YourProduct";
+$value = 100.00;
+$dueDate = "2024-12-31";
+$date = "2024-11-15";
+$host = gethostname(); // Get the hostname of the server
 
+// Insert SQL statement
+$insert_sql = "INSERT INTO dados (company, cnpj, state, product, value, dueDate, date, host) 
+               VALUES ('$company', '$cnpj', '$state', '$product', $value, '$dueDate', '$date', '$host')";
 
-$query = "INSERT INTO dados (AlunoID, Nome, Sobrenome, Endereco, Cidade, Host) VALUES ('$valor_rand1' , '$valor_rand2', '$valor_rand2', '$valor_rand2', '$valor_rand2','$host_name')";
-
-
-if ($link->query($query) === TRUE) {
-  echo "New record created successfully";
+if ($conn->query($insert_sql) === TRUE) {
+    echo "New record created successfully.<br>";
 } else {
-  echo "Error: " . $link->error;
+    echo "Error: " . $insert_sql . "<br>" . $conn->error;
 }
 
+// Query to retrieve all records
+$query_sql = "SELECT * FROM dados";
+$result = $conn->query($query_sql);
+
+if ($result->num_rows > 0) {
+    echo "<table border='1'>
+            <tr>
+                <th>Company</th>
+                <th>CNPJ</th>
+                <th>State</th>
+                <th>Product</th>
+                <th>Value</th>
+                <th>Due Date</th>
+                <th>Date</th>
+                <th>Host</th>
+            </tr>";
+    // Output data of each row
+    while($row = $result->fetch_assoc()) {
+        echo "<tr>
+                <td>".$row["company"]."</td>
+                <td>".$row["cnpj"]."</td>
+                <td>".$row["state"]."</td>
+                <td>".$row["product"]."</td>
+                <td>".$row["value"]."</td>
+                <td>".$row["dueDate"]."</td>
+                <td>".$row["date"]."</td>
+                <td>".$row["host"]."</td>
+              </tr>";
+    }
+    echo "</table>";
+} else {
+    echo "0 results";
+}
+
+// Close connection
+$conn->close();
 ?>
 </body>
 </html>
